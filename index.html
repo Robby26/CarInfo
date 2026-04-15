@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="管理您的車輛保養記錄、追蹤保養時程與里程提醒" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚗</text></svg>" />
   <title>車輛保養管理系統</title>
   <style>
     :root {
@@ -26,7 +28,8 @@
       --shadow-lg: 0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05);
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    *, *::before, *::after { box-sizing: border-box; }
+    body, h1, h2, h3, h4, p, ul, ol, figure { margin: 0; padding: 0; }
 
     body {
       font-family: 'Segoe UI', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
@@ -70,7 +73,7 @@
     .btn-add-car:hover { background: rgba(255,255,255,.3); }
 
     /* ── Layout ── */
-    .app-body { display: flex; min-height: calc(100vh - 64px); }
+    .app-body { display: flex; min-height: calc(100dvh - 64px); }
 
     .sidebar {
       width: 260px;
@@ -774,6 +777,13 @@
 </head>
 <body>
 
+<noscript>
+  <div style="text-align:center;padding:60px 20px;font-family:sans-serif;">
+    <h1>🚗 車輛保養管理系統</h1>
+    <p style="margin-top:16px;color:#666;">此應用需要啟用 JavaScript 才能運作，請在瀏覽器設定中啟用 JavaScript。</p>
+  </div>
+</noscript>
+
 <!-- Toast Container -->
 <div class="toast-container" id="toastContainer"></div>
 
@@ -781,12 +791,12 @@
 <header class="app-header">
   <h1><span class="icon">🚗</span>車輛保養管理</h1>
   <div class="header-tools">
-    <label class="btn-header-tool" title="匯入 JSON 備份">
+    <label class="btn-header-tool" title="匯入 JSON 備份" aria-label="匯入 JSON 備份">
       📥
       <input type="file" id="importFileInput" accept=".json" style="display:none;" onchange="onImportFile(this)">
     </label>
-    <button class="btn-header-tool" title="匯出 JSON 備份" onclick="exportJSON()">📤</button>
-    <button class="btn-header-save" onclick="saveAndClear()">💾 儲存並離開</button>
+    <button class="btn-header-tool" title="匯出 JSON 備份" aria-label="匯出 JSON 備份" onclick="exportJSON()">📤</button>
+    <button class="btn-header-save" onclick="saveAndClear()" aria-label="儲存並離開">💾 儲存並離開</button>
     <button class="btn-add-car" onclick="openCarModal()">
       <span>＋</span> 新增車輛
     </button>
@@ -809,10 +819,10 @@
 </div>
 
 <!-- ── Modal: Startup ── -->
-<div class="modal-overlay" id="startupModal">
+<div class="modal-overlay" id="startupModal" role="dialog" aria-modal="true" aria-labelledby="startupModalTitle">
   <div class="modal" style="max-width:440px;">
     <div class="modal-header" style="border-bottom:none;padding-bottom:4px;">
-      <h2>🚗 車輛保養管理</h2>
+      <h2 id="startupModalTitle">🚗 車輛保養管理</h2>
     </div>
     <div class="modal-body" style="padding-top:8px;">
       <p style="font-size:.85rem;color:var(--gray-500);margin-bottom:20px;line-height:1.6;">
@@ -827,11 +837,11 @@
 </div>
 
 <!-- ── Modal: Car ── -->
-<div class="modal-overlay" id="carModal">
+<div class="modal-overlay" id="carModal" role="dialog" aria-modal="true" aria-labelledby="carModalTitle">
   <div class="modal">
     <div class="modal-header">
       <h2 id="carModalTitle">🚗 新增車輛</h2>
-      <button class="btn-close" onclick="closeModal('carModal')">✕</button>
+      <button class="btn-close" onclick="closeModal('carModal')" aria-label="關閉">✕</button>
     </div>
     <div class="modal-body">
       <p style="font-size:.8rem;color:var(--gray-400);margin-bottom:16px;">選擇車輛圖示</p>
@@ -887,11 +897,11 @@
 </div>
 
 <!-- ── Modal: Maintenance ── -->
-<div class="modal-overlay" id="maintModal">
+<div class="modal-overlay" id="maintModal" role="dialog" aria-modal="true" aria-labelledby="maintModalTitle">
   <div class="modal">
     <div class="modal-header">
       <h2 id="maintModalTitle">🔧 新增保養記錄</h2>
-      <button class="btn-close" onclick="closeModal('maintModal')">✕</button>
+      <button class="btn-close" onclick="closeModal('maintModal')" aria-label="關閉">✕</button>
     </div>
     <div class="modal-body">
       <div class="form-row">
@@ -943,11 +953,11 @@
 </div>
 
 <!-- ── Modal: Update Mileage ── -->
-<div class="modal-overlay" id="mileageModal">
+<div class="modal-overlay" id="mileageModal" role="dialog" aria-modal="true" aria-labelledby="mileageModalTitle">
   <div class="modal" style="max-width:400px;">
     <div class="modal-header">
-      <h2>📍 更新里程數</h2>
-      <button class="btn-close" onclick="closeModal('mileageModal')">✕</button>
+      <h2 id="mileageModalTitle">📍 更新里程數</h2>
+      <button class="btn-close" onclick="closeModal('mileageModal')" aria-label="關閉">✕</button>
     </div>
     <div class="modal-body">
       <div class="form-group">
@@ -961,6 +971,23 @@
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('mileageModal')">取消</button>
       <button class="btn btn-primary" onclick="saveNewMileage()">更新</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal: Confirm dialog ── -->
+<div class="modal-overlay" id="confirmModal" role="alertdialog" aria-modal="true" aria-labelledby="confirmModalTitle" aria-describedby="confirmModalMsg">
+  <div class="modal" style="max-width:380px;">
+    <div class="modal-header">
+      <h2 id="confirmModalTitle">確認</h2>
+      <button class="btn-close" onclick="resolveConfirm(false)" aria-label="關閉">✕</button>
+    </div>
+    <div class="modal-body">
+      <p id="confirmModalMsg" style="font-size:.9rem;line-height:1.6;"></p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="resolveConfirm(false)">取消</button>
+      <button class="btn btn-danger" id="confirmModalOk" onclick="resolveConfirm(true)">確定</button>
     </div>
   </div>
 </div>
@@ -1042,7 +1069,15 @@ let editingMaintId = null;
 // ─────────────────────────────────────────────
 //  Helpers
 // ─────────────────────────────────────────────
-function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+function uid() {
+  if (crypto.randomUUID) return crypto.randomUUID();
+  return Date.now().toString(36) + Math.random().toString(36).slice(2);
+}
+
+// Validate that a string is a safe ID (alphanumeric, hyphens, no injection)
+function isSafeId(str) {
+  return typeof str === 'string' && /^[a-zA-Z0-9_-]+$/.test(str);
+}
 
 function selectedCar() {
   return appData.cars.find(c => c.id === appData.selectedCarId) || null;
@@ -1154,7 +1189,7 @@ function renderSidebar() {
       ...Array(Math.min(warn, 3)).fill(`<span class="alert-dot" style="background:var(--warning)"></span>`),
     ].slice(0,4).join('');
     return `
-      <div class="car-item${active}" onclick="selectCar('${car.id}')">
+      <div class="car-item${active}" role="button" tabindex="0" data-car-id="${escAttr(car.id)}">
         <div class="car-avatar">${car.emoji || '🚗'}</div>
         <div class="car-meta">
           <div class="car-name">${esc(car.name)}</div>
@@ -1163,6 +1198,13 @@ function renderSidebar() {
         ${dots ? `<div class="car-alerts">${dots}</div>` : ''}
       </div>`;
   }).join('');
+
+  // Bind events via delegation
+  list.querySelectorAll('.car-item[data-car-id]').forEach(el => {
+    const handler = () => selectCar(el.dataset.carId);
+    el.addEventListener('click', handler);
+    el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handler(); } });
+  });
 }
 
 function renderMain() {
@@ -1259,7 +1301,7 @@ function renderMain() {
       const r = buildMaintInfo(latest, true);
 
       const toggleBtn = hasChildren
-        ? `<span class="tree-toggle" onclick="toggleTreeGroup('${groupId}')" id="tog_${groupId}">▶</span>`
+        ? `<span class="tree-toggle" data-toggle-group="${escAttr(groupId)}" id="tog_${escAttr(groupId)}">▶</span>`
         : `<span style="display:inline-block;width:30px;"></span>`;
       const countBadge = hasChildren ? `<span class="tree-group-count">${children.length}</span>` : '';
 
@@ -1285,15 +1327,15 @@ function renderMain() {
           <td><span class="badge ${r.badgeClass}"><span class="badge-dot"></span>${r.badgeText}</span></td>
           <td>
             <div style="display:flex;gap:6px;">
-              <button class="btn btn-outline btn-sm" onclick="openMaintModal('${latest.id}')">✏️</button>
-              <button class="btn btn-danger btn-sm" onclick="deleteMaint('${latest.id}')">🗑️</button>
+              <button class="btn btn-outline btn-sm" data-action="edit-maint" data-id="${escAttr(latest.id)}" aria-label="編輯">✏️</button>
+              <button class="btn btn-danger btn-sm" data-action="delete-maint" data-id="${escAttr(latest.id)}" aria-label="刪除">🗑️</button>
             </div>
           </td>
         </tr>`;
 
       children.forEach(m => {
         tableRows += `
-          <tr class="tree-child-row ${groupId}" style="display:none;">
+          <tr class="tree-child-row ${escAttr(groupId)}" style="display:none;">
             <td>
               <div style="display:flex;align-items:center;">
                 <span class="child-indent">└</span>
@@ -1314,8 +1356,8 @@ function renderMain() {
             <td><span class="badge badge-ok"><span class="badge-dot"></span>歷史紀錄</span></td>
             <td>
               <div style="display:flex;gap:6px;">
-                <button class="btn btn-outline btn-sm" onclick="openMaintModal('${m.id}')">✏️</button>
-                <button class="btn btn-danger btn-sm" onclick="deleteMaint('${m.id}')">🗑️</button>
+                <button class="btn btn-outline btn-sm" data-action="edit-maint" data-id="${escAttr(m.id)}" aria-label="編輯">✏️</button>
+                <button class="btn btn-danger btn-sm" data-action="delete-maint" data-id="${escAttr(m.id)}" aria-label="刪除">🗑️</button>
               </div>
             </td>
           </tr>`;
@@ -1339,9 +1381,9 @@ function renderMain() {
         </div>
       </div>
       <div class="car-detail-actions">
-        <button class="btn btn-outline btn-sm" onclick="openMileageModal()">📍 更新里程</button>
-        <button class="btn btn-outline btn-sm" onclick="openCarModal('${car.id}')">✏️ 編輯</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteCar('${car.id}')">🗑️</button>
+        <button class="btn btn-outline btn-sm" data-action="update-mileage" aria-label="更新里程">📍 更新里程</button>
+        <button class="btn btn-outline btn-sm" data-action="edit-car" data-id="${escAttr(car.id)}" aria-label="編輯車輛">✏️ 編輯</button>
+        <button class="btn btn-danger btn-sm" data-action="delete-car" data-id="${escAttr(car.id)}" aria-label="刪除車輛">🗑️</button>
       </div>
     </div>
 
@@ -1371,10 +1413,10 @@ function renderMain() {
         <h3>🔧 保養紀錄與提醒</h3>
         <div style="display:flex;gap:10px;align-items:center;">
           <div class="view-tabs">
-            <button class="view-tab active" onclick="switchView('table',this)">📋 表格</button>
-            <button class="view-tab" onclick="switchView('timeline',this)">📅 時間軸</button>
+            <button class="view-tab active" data-view="table">📋 表格</button>
+            <button class="view-tab" data-view="timeline">📅 時間軸</button>
           </div>
-          <button class="btn btn-primary btn-sm" onclick="openMaintModal()">＋ 新增保養</button>
+          <button class="btn btn-primary btn-sm" data-action="add-maint">＋ 新增保養</button>
         </div>
       </div>
       <div id="tableView" style="overflow-x:auto;">
@@ -1400,6 +1442,9 @@ function renderMain() {
     </div>
   `;
 
+  // Bind event delegation on main content
+  bindMainEvents(main);
+
   // Restore view state
   if (currentView === 'timeline') {
     const tv = document.getElementById('tableView');
@@ -1411,6 +1456,38 @@ function renderMain() {
     if (tabs[1]) tabs[1].classList.add('active');
     renderTimeline();
   }
+}
+
+function bindMainEvents(root) {
+  // Event delegation for data-action buttons
+  root.addEventListener('click', e => {
+    const btn = e.target.closest('[data-action]');
+    if (btn) {
+      const action = btn.dataset.action;
+      const id = btn.dataset.id;
+      switch (action) {
+        case 'edit-maint': openMaintModal(id); break;
+        case 'delete-maint': deleteMaint(id); break;
+        case 'add-maint': openMaintModal(); break;
+        case 'update-mileage': openMileageModal(); break;
+        case 'edit-car': openCarModal(id); break;
+        case 'delete-car': deleteCar(id); break;
+      }
+      return;
+    }
+    // Tree toggles
+    const toggle = e.target.closest('[data-toggle-group]');
+    if (toggle) {
+      toggleTreeGroup(toggle.dataset.toggleGroup);
+      return;
+    }
+    // View tabs
+    const viewTab = e.target.closest('[data-view]');
+    if (viewTab) {
+      switchView(viewTab.dataset.view, viewTab);
+      return;
+    }
+  });
 }
 
 // ─────────────────────────────────────────────
@@ -1670,8 +1747,7 @@ function buildTimelineFilters(allTypes, visibleTypes, fromDate, toDate) {
   const chips = allTypes.map((type, i) => {
     const color = getTypeColor(type, allTypes);
     const active = visibleTypes.includes(type) ? ' active' : '';
-    const safeType = type.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-    return `<label class="filter-chip${active}" onclick="toggleTypeFilter('${safeType}')">
+    return `<label class="filter-chip${active}" data-filter-type="${escAttr(type)}">
       <span class="chip-dot" style="background:${color}"></span>
       ${esc(type)}
     </label>`;
@@ -1683,24 +1759,45 @@ function buildTimelineFilters(allTypes, visibleTypes, fromDate, toDate) {
         <span class="filter-label">保養項目</span>
         ${chips}
         <div class="filter-actions">
-          <button onclick="tlSelectAll()">全選</button>
-          <button onclick="tlDeselectAll()">全不選</button>
+          <button data-tl-action="select-all">全選</button>
+          <button data-tl-action="deselect-all">全不選</button>
         </div>
       </div>
     </div>
     <div class="timeline-filters" style="border-bottom:1px solid var(--gray-100);">
       <div class="timeline-date-range">
         <span class="filter-label">日期範圍</span>
-        <input type="date" id="tlDateFrom" value="${fromDate || ''}" onchange="onTlDateChange()">
+        <input type="date" id="tlDateFrom" value="${fromDate || ''}">
         <span>至</span>
-        <input type="date" id="tlDateTo" value="${toDate || ''}" onchange="onTlDateChange()">
-        <button style="font-size:.72rem;padding:3px 8px;border-radius:6px;border:1px solid var(--gray-200);background:#fff;color:var(--gray-500);cursor:pointer;" onclick="document.getElementById('tlDateFrom').value='';document.getElementById('tlDateTo').value='';onTlDateChange();">清除</button>
+        <input type="date" id="tlDateTo" value="${toDate || ''}">
+        <button data-tl-action="clear-dates" style="font-size:.72rem;padding:3px 8px;border-radius:6px;border:1px solid var(--gray-200);background:#fff;color:var(--gray-500);cursor:pointer;">清除</button>
       </div>
     </div>`;
 }
 
 function bindTimelineEvents() {
-  // Rebind click outside for filter chips — no-op, inline onclick handles it
+  const container = document.getElementById('timelineView');
+  if (!container) return;
+  container.querySelectorAll('[data-filter-type]').forEach(el => {
+    el.addEventListener('click', () => toggleTypeFilter(el.dataset.filterType));
+  });
+  container.querySelectorAll('[data-tl-action]').forEach(el => {
+    el.addEventListener('click', () => {
+      switch (el.dataset.tlAction) {
+        case 'select-all': tlSelectAll(); break;
+        case 'deselect-all': tlDeselectAll(); break;
+        case 'clear-dates':
+          document.getElementById('tlDateFrom').value = '';
+          document.getElementById('tlDateTo').value = '';
+          onTlDateChange();
+          break;
+      }
+    });
+  });
+  const fromEl = document.getElementById('tlDateFrom');
+  const toEl = document.getElementById('tlDateTo');
+  if (fromEl) fromEl.addEventListener('change', onTlDateChange);
+  if (toEl) toEl.addEventListener('change', onTlDateChange);
 }
 
 function generateTicks(minDate, maxDate) {
@@ -1759,10 +1856,14 @@ function formatDate(d) {
   return `${dt.getFullYear()}/${String(dt.getMonth()+1).padStart(2,'0')}/${String(dt.getDate()).padStart(2,'0')}`;
 }
 
+const _escMap = { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' };
 function esc(str) {
-  const d = document.createElement('div');
-  d.textContent = str || '';
-  return d.innerHTML;
+  return String(str || '').replace(/[&<>"']/g, c => _escMap[c]);
+}
+
+// Escape a value for safe use inside an HTML attribute (e.g. onclick, data-*)
+function escAttr(str) {
+  return esc(str).replace(/\\/g, '\\\\');
 }
 
 // ─────────────────────────────────────────────
@@ -1835,14 +1936,16 @@ function saveCar() {
 }
 
 function deleteCar(id) {
-  if (!confirm('確定要刪除此車輛及所有保養紀錄嗎？')) return;
-  appData.cars = appData.cars.filter(c => c.id !== id);
-  if (appData.selectedCarId === id) {
-    appData.selectedCarId = appData.cars[0]?.id || null;
-  }
-  saveData(appData);
-  showToast('車輛已刪除', 'success');
-  renderAll();
+  showConfirm('確定要刪除此車輛及所有保養紀錄嗎？', '刪除').then(ok => {
+    if (!ok) return;
+    appData.cars = appData.cars.filter(c => c.id !== id);
+    if (appData.selectedCarId === id) {
+      appData.selectedCarId = appData.cars[0]?.id || null;
+    }
+    saveData(appData);
+    showToast('車輛已刪除', 'success');
+    renderAll();
+  });
 }
 
 // ─────────────────────────────────────────────
@@ -1860,11 +1963,22 @@ function saveNewMileage() {
   if (!car) return;
   const val = Number(document.getElementById('newMileage').value);
   if (!val || val < 0) { showToast('請輸入有效里程數', 'error'); return; }
-  car.mileage = val;
-  saveData(appData);
-  closeModal('mileageModal');
-  showToast('里程數已更新 ✓', 'success');
-  renderAll();
+
+  const doSave = () => {
+    car.mileage = val;
+    saveData(appData);
+    closeModal('mileageModal');
+    showToast('里程數已更新 ✓', 'success');
+    renderAll();
+  };
+
+  if (car.mileage && val < car.mileage) {
+    showConfirm(`新里程 (${fmtKm(val)} km) 小於目前里程 (${fmtKm(car.mileage)} km)，確定要更新嗎？`, '確定更新').then(ok => {
+      if (ok) doSave();
+    });
+  } else {
+    doSave();
+  }
 }
 
 // ─────────────────────────────────────────────
@@ -2041,38 +2155,77 @@ function saveMaint(keepOpen = false) {
 }
 
 function deleteMaint(maintId) {
-  if (!confirm('確定要刪除此保養記錄？')) return;
-  const car = selectedCar();
-  if (!car) return;
-  car.maintenances = (car.maintenances || []).filter(m => m.id !== maintId);
-  saveData(appData);
-  showToast('保養記錄已刪除', 'success');
-  renderAll();
+  showConfirm('確定要刪除此保養記錄？', '刪除').then(ok => {
+    if (!ok) return;
+    const car = selectedCar();
+    if (!car) return;
+    car.maintenances = (car.maintenances || []).filter(m => m.id !== maintId);
+    saveData(appData);
+    showToast('保養記錄已刪除', 'success');
+    renderAll();
+  });
 }
 
 // ─────────────────────────────────────────────
 //  Modal helpers
 // ─────────────────────────────────────────────
+let _lastFocusedElement = null;
+
 function openModal(id) {
-  document.getElementById(id).classList.add('show');
+  _lastFocusedElement = document.activeElement;
+  const modal = document.getElementById(id);
+  modal.classList.add('show');
   document.body.style.overflow = 'hidden';
+  // Focus first focusable element inside modal
+  requestAnimationFrame(() => {
+    const focusable = modal.querySelector('button, [href], input:not([type=hidden]), select, textarea, [tabindex]:not([tabindex="-1"])');
+    if (focusable) focusable.focus();
+  });
 }
 
 function closeModal(id) {
   document.getElementById(id).classList.remove('show');
   document.body.style.overflow = '';
+  // Restore focus
+  if (_lastFocusedElement && typeof _lastFocusedElement.focus === 'function') {
+    _lastFocusedElement.focus();
+    _lastFocusedElement = null;
+  }
+}
+
+// Custom confirm dialog
+let _confirmResolve = null;
+function showConfirm(msg, okText = '確定') {
+  return new Promise(resolve => {
+    _confirmResolve = resolve;
+    document.getElementById('confirmModalMsg').textContent = msg;
+    document.getElementById('confirmModalOk').textContent = okText;
+    openModal('confirmModal');
+  });
+}
+function resolveConfirm(result) {
+  closeModal('confirmModal');
+  if (_confirmResolve) { _confirmResolve(result); _confirmResolve = null; }
 }
 
 // Close on overlay click
 document.querySelectorAll('.modal-overlay').forEach(el => {
   el.addEventListener('click', e => {
-    if (e.target === el) closeModal(el.id);
+    if (e.target === el) {
+      if (el.id === 'confirmModal') { resolveConfirm(false); }
+      else { closeModal(el.id); }
+    }
   });
 });
 
 // Close on Esc
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
+    const confirmEl = document.getElementById('confirmModal');
+    if (confirmEl && confirmEl.classList.contains('show')) {
+      resolveConfirm(false);
+      return;
+    }
     document.querySelectorAll('.modal-overlay.show').forEach(el => closeModal(el.id));
   }
 });
@@ -2116,13 +2269,36 @@ async function importFromFile(file) {
     const text = await file.text();
     const data = JSON.parse(text);
     if (!data || !Array.isArray(data.cars)) throw new Error('格式錯誤');
+
+    // Validate imported data structure
+    data.cars.forEach(car => {
+      if (typeof car !== 'object' || !car) throw new Error('車輛格式錯誤');
+      if (!car.id || typeof car.id !== 'string') car.id = uid();
+      if (typeof car.name !== 'string' || !car.name.trim()) throw new Error('車輛缺少名稱');
+      car.name = car.name.substring(0, 30);
+      car.plate = String(car.plate || '').substring(0, 10);
+      car.brand = String(car.brand || '').substring(0, 30);
+      car.mileage = Math.max(0, Number(car.mileage) || 0);
+      car.initialMileage = Math.max(0, Number(car.initialMileage) || 0);
+      if (!Array.isArray(car.maintenances)) car.maintenances = [];
+      car.maintenances.forEach(m => {
+        if (typeof m !== 'object' || !m) throw new Error('保養記錄格式錯誤');
+        if (!m.id || typeof m.id !== 'string') m.id = uid();
+        if (!m.type || typeof m.type !== 'string') throw new Error('保養記錄缺少項目');
+        m.type = m.type.substring(0, 30);
+        m.mileage = Number(m.mileage) || 0;
+        m.interval = m.interval ? Number(m.interval) : null;
+        m.note = String(m.note || '').substring(0, 500);
+      });
+    });
+
     appData = { cars: data.cars, selectedCarId: data.selectedCarId || data.cars[0]?.id || null };
     await dbSaveAll(appData);
     sessionStorage.setItem('sessionActive', 'true');
     renderAll();
     showToast(`已匯入 ${appData.cars.length} 部車輛 ✓`, 'success');
   } catch(e) {
-    showToast('匯入失敗：檔案格式不符', 'error');
+    showToast('匯入失敗：' + (e.message || '檔案格式不符'), 'error');
   }
 }
 
@@ -2222,13 +2398,8 @@ window.addEventListener('beforeunload', onBeforeUnload);
 window.addEventListener('pagehide', e => {
   if (!e.persisted) {
     sessionStorage.removeItem('sessionActive');
-    try {
-      if (_db) {
-        const tx = _db.transaction(['cars', 'settings'], 'readwrite');
-        tx.objectStore('cars').clear();
-        tx.objectStore('settings').clear();
-      }
-    } catch(err) {}
+    // Note: synchronous IndexedDB clearing in pagehide is unreliable.
+    // Residual data will be detected on next startup via the startup modal.
   }
 });
 
