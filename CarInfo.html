@@ -1535,6 +1535,13 @@ function switchView(view, btn) {
   }
 }
 
+function getTimelineMileageDiff(latestMaint, currentMileage) {
+  if (!latestMaint || latestMaint.mileage == null || latestMaint.mileage === '') {
+    return Number.NEGATIVE_INFINITY;
+  }
+  return currentMileage - Number(latestMaint.mileage);
+}
+
 function toggleTypeFilter(type) {
   if (tlTypeFilters.has(type)) tlTypeFilters.delete(type);
   else tlTypeFilters.add(type);
@@ -1567,6 +1574,8 @@ function renderTimeline() {
 
   const maints = car.maintenances || [];
   const allTypes = [...new Set(maints.map(m => m.type))].sort();
+  const currentMileage = car.mileage || 0;
+  const latestByType = getLatestByType(maints);
 
   // Collect all events (past + planned)
   let events = [];
@@ -1577,6 +1586,15 @@ function renderTimeline() {
 
   // Apply type filter
   const visibleTypes = allTypes.filter(t => !tlTypeFilters.has(t));
+  const sortedVisibleTypes = [...visibleTypes].sort((a, b) => {
+    const diff = getTimelineMileageDiff(latestByType[b], currentMileage) - getTimelineMileageDiff(latestByType[a], currentMileage);
+    if (diff !== 0) return diff;
+
+    const latestDateDiff = (latestByType[b]?.date || '').localeCompare(latestByType[a]?.date || '');
+    if (latestDateDiff !== 0) return latestDateDiff;
+
+    return a.localeCompare(b, 'zh-TW');
+  });
 
   // Apply date filter
   const fromDate = tlDateFrom || null;
@@ -1618,8 +1636,7 @@ function renderTimeline() {
   const showToday = today >= minDate && today <= maxDate;
 
   // Build chart rows
-  const currentMileage = car.mileage || 0;
-  const rowsHtml = visibleTypes.map(type => {
+  const rowsHtml = sortedVisibleTypes.map(type => {
     const typeEvents = filtered.filter(e => e.type === type);
     const color = getTypeColor(type, allTypes);
     const gridLines = ticks.map(t => {
