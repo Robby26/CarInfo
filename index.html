@@ -85,14 +85,81 @@
       flex-shrink: 0;
     }
 
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 0 16px 8px;
+    }
+
+    .sidebar-header-copy {
+      flex: 1;
+      min-width: 0;
+    }
+
     .sidebar-title {
       font-size: .75rem;
       font-weight: 700;
       color: var(--gray-400);
       text-transform: uppercase;
       letter-spacing: .08em;
-      padding: 0 16px 8px;
+      padding: 0;
     }
+
+    .sidebar-summary {
+      display: none;
+      margin-top: 4px;
+      font-size: .82rem;
+      font-weight: 600;
+      color: var(--gray-500);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sidebar-toggle {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      min-width: 68px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      border: 1.5px solid var(--gray-200);
+      background: var(--gray-50);
+      color: var(--gray-600);
+      font-size: .78rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .15s;
+      flex-shrink: 0;
+    }
+    .sidebar-toggle:hover { border-color: var(--primary); background: #eff6ff; color: var(--primary); }
+
+    .sidebar.mobile-mode {
+      width: 100%;
+      border-right: none;
+      border-bottom: 1px solid var(--gray-200);
+      padding: 0;
+    }
+
+    .sidebar.mobile-mode .sidebar-header { padding: 12px 16px 10px; }
+    .sidebar.mobile-mode .sidebar-summary { display: block; }
+    .sidebar.mobile-mode .sidebar-toggle { display: inline-flex; }
+    .sidebar.mobile-mode.collapsed .car-list { display: none; }
+    .sidebar.mobile-mode.collapsed .sidebar-toggle { border-color: #bfdbfe; background: #eff6ff; color: var(--primary-dark); }
+    .sidebar.mobile-mode .car-list { display: flex; overflow-x: auto; padding: 4px 8px 12px; }
+    .sidebar.mobile-mode .car-item {
+      flex-direction: column;
+      text-align: center;
+      gap: 4px;
+      min-width: 80px;
+      border-left: none;
+      border-bottom: 3px solid transparent;
+      padding: 8px;
+    }
+    .sidebar.mobile-mode .car-item.active { border-left-color: transparent; border-bottom-color: var(--primary); }
+    .sidebar.mobile-mode .car-meta .car-plate { display: none; }
 
     .car-list { flex: 1; overflow-y: auto; }
 
@@ -394,11 +461,6 @@
     /* Responsive */
     @media (max-width: 768px) {
       .app-body { flex-direction: column; }
-      .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--gray-200); padding: 8px 0; }
-      .car-list { display: flex; overflow-x: auto; padding: 4px 8px; }
-      .car-item { flex-direction: column; text-align: center; gap: 4px; min-width: 80px; border-left: none; border-bottom: 3px solid transparent; padding: 8px; }
-      .car-item.active { border-left-color: transparent; border-bottom-color: var(--primary); }
-      .car-meta .car-plate { display: none; }
       .car-detail-header { flex-wrap: wrap; }
       .maint-table { display: block; overflow-x: auto; }
       .form-row { grid-template-columns: 1fr; }
@@ -805,8 +867,14 @@
 
 <div class="app-body">
   <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="sidebar-title">我的車輛</div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-header-copy">
+        <div class="sidebar-title">我的車輛</div>
+        <div class="sidebar-summary" id="sidebarSummary">尚無車輛</div>
+      </div>
+      <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-controls="carList" aria-expanded="true" aria-label="切換車輛清單" onclick="toggleSidebar()">收合</button>
+    </div>
     <div class="car-list" id="carList">
       <!-- JS rendered -->
     </div>
@@ -1065,6 +1133,9 @@ function saveData(data) {
 let appData = { cars: [], selectedCarId: null };
 let editingCarId = null;
 let editingMaintId = null;
+const MOBILE_SIDEBAR_BREAKPOINT = 768;
+let isMobileSidebarViewport = window.innerWidth <= MOBILE_SIDEBAR_BREAKPOINT;
+let isSidebarCollapsed = isMobileSidebarViewport;
 
 // ─────────────────────────────────────────────
 //  Helpers
@@ -1081,6 +1152,16 @@ function isSafeId(str) {
 
 function selectedCar() {
   return appData.cars.find(c => c.id === appData.selectedCarId) || null;
+}
+
+function syncSidebarViewportState() {
+  const mobile = window.innerWidth <= MOBILE_SIDEBAR_BREAKPOINT;
+  if (mobile !== isMobileSidebarViewport) {
+    isMobileSidebarViewport = mobile;
+    isSidebarCollapsed = mobile;
+    return true;
+  }
+  return false;
 }
 
 const CAR_EMOJIS = ['🚗','🚙','🚕','🚌','🚐','🏎️','🚓','🚑','🚒','🛻','🚚','🚛','🛺','🏍️','🚐','🚤'];
@@ -1176,7 +1257,31 @@ function renderAll() {
 }
 
 function renderSidebar() {
+  const sidebar = document.getElementById('sidebar');
   const list = document.getElementById('carList');
+  const summary = document.getElementById('sidebarSummary');
+  const toggle = document.getElementById('sidebarToggle');
+  const car = selectedCar();
+  syncSidebarViewportState();
+  const mobile = isMobileSidebarViewport;
+
+  if (sidebar) {
+    sidebar.classList.toggle('mobile-mode', mobile);
+    sidebar.classList.toggle('collapsed', mobile && isSidebarCollapsed);
+  }
+
+  if (summary) {
+    if (car) summary.textContent = `${car.emoji || '🚗'} ${car.name}`;
+    else if (appData.cars.length) summary.textContent = `共 ${appData.cars.length} 部車輛`;
+    else summary.textContent = '尚無車輛';
+  }
+
+  if (toggle) {
+    const expanded = !(mobile && isSidebarCollapsed);
+    toggle.textContent = expanded ? '收合' : '展開';
+    toggle.setAttribute('aria-expanded', String(expanded));
+  }
+
   if (!appData.cars.length) {
     list.innerHTML = '<div style="padding:16px;text-align:center;color:var(--gray-400);font-size:.8rem;">尚無車輛，請新增</div>';
     return;
@@ -1888,8 +1993,17 @@ function escAttr(str) {
 // ─────────────────────────────────────────────
 function selectCar(id) {
   appData.selectedCarId = id;
+  if (isMobileSidebarViewport) {
+    isSidebarCollapsed = true;
+  }
   saveData(appData);
   renderAll();
+}
+
+function toggleSidebar() {
+  if (!isMobileSidebarViewport) return;
+  isSidebarCollapsed = !isSidebarCollapsed;
+  renderSidebar();
 }
 
 function openCarModal(carId) {
@@ -2417,6 +2531,12 @@ window.addEventListener('pagehide', e => {
     sessionStorage.removeItem('sessionActive');
     // Note: synchronous IndexedDB clearing in pagehide is unreliable.
     // Residual data will be detected on next startup via the startup modal.
+  }
+});
+
+window.addEventListener('resize', () => {
+  if (syncSidebarViewportState()) {
+    renderSidebar();
   }
 });
 
