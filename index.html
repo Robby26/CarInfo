@@ -1753,7 +1753,12 @@ function renderTimeline() {
     return;
   }
 
+  // Declare today early so it can be included in the axis range
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
   if (car.purchaseDate) allDates.push(car.purchaseDate);
+  allDates.push(today.toISOString().split('T')[0]);
   allDates.sort();
   let minDate = new Date(allDates[0]);
   let maxDate = new Date(allDates[allDates.length - 1]);
@@ -1769,11 +1774,8 @@ function renderTimeline() {
   // Generate tick marks (roughly 6-10 ticks)
   const ticks = generateTicks(minDate, maxDate);
 
-  // Today line position
-  const today = new Date();
-  today.setHours(0,0,0,0);
-  const todayPct = Math.max(0, Math.min(100, ((today - minDate) / totalMs) * 100));
-  const showToday = today >= minDate && today <= maxDate;
+  const todayPct = ((today - minDate) / totalMs) * 100;
+  const showToday = true;
 
   // Build chart rows
   const rowsHtml = sortedVisibleTypes.map(type => {
